@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#128C7E">
+    <title>Truth or Dare Chat Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        body {
+            background: #128C7E;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: #333;
+        }
+        
+        /* WhatsApp Header */
+        .header {
+            background: #128C7E;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header i {
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #ECE5DD;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        /* Chat bubbles */
+        .message {
+            max-width: 85%;
+            margin-bottom: 15px;
+            clear: both;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message {
+            float: left;
+        }
+        
+        .user-message {
+            float: right;
+        }
+        
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 7.5px;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 16px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+        
+        .bot-message .message-content {
+            background: white;
+            border-top-left-radius: 0;
+            color: #333;
+        }
+        
+        .user-message .message-content {
+            background: #DCF8C6;
+            border-top-right-radius: 0;
+            color: #333;
+        }
+        
+        /* Timestamp */
+        .timestamp {
+            font-size: 0.7rem;
+            color: #999;
+            text-align: right;
+            margin-top: 3px;
+        }
+        
+        /* Level Selection */
+        .level-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .level-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 10px;
+            border: none;
+            border-radius: 20px;
+            background: white;
+            color: #128C7E;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .level-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .level-btn.friendly { background: #25D366; color: white; }
+        .level-btn.couple { background: #FF4081; color: white; }
+        .level-btn.intimate { background: #9C27B0; color: white; }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 10px;
+            border: none;
+            border-radius: 20px;
+            background: white;
+            color: #128C7E;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .action-btn.truth { background: #4CAF50; color: white; }
+        .action-btn.dare { background: #FF5722; color: white; }
+        .action-btn.next { background: #2196F3; color: white; }
+        .action-btn.restart { background: #9C27B0; color: white; }
+        
+        /* Input Area */
+        .input-area {
+            background: #F0F0F0;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #E0E0E0;
+        }
+        
+        /* Prompt Card */
+        .prompt-card {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .prompt-type {
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .prompt-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            max-width: 90%;
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        .install-icon {
+            font-size: 2rem;
+            color: #128C7E;
+        }
+        
+        .install-text {
+            font-size: 0.9rem;
+            color: #333;
+            max-width: 250px;
+        }
+        
+        .install-btn {
+            background: #128C7E;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-2px);
+            background: #0C7A6D;
+        }
+        
+        .close-install {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 5px;
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 20px;
+            width: fit-content;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .message-content {
+                font-size: 15px;
+                padding: 10px 14px;
+            }
+            
+            .prompt-text {
+                font-size: 1.5rem;
+            }
+            
+            .level-btn, .action-btn {
+                font-size: 0.85rem;
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- WhatsApp Header -->
+    <div class="header">
+        <i class="fas fa-arrow-left" id="backButton"></i>
+        <h1>Truth or Dare Game</h1>
+    </div>
+    
+    <!-- Chat Container -->
+    <div class="chat-container" id="chatContainer">
+        <!-- Initial messages will be added here by JavaScript -->
+    </div>
+    
+    <!-- Input Area -->
+    <div class="input-area" id="inputArea">
+        <!-- Buttons will be added here by JavaScript -->
+    </div>
+    
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <div class="install-icon">📱</div>
+        <div class="install-text">Install this app for a better experience</div>
+        <button class="install-btn" id="installButton">Install</button>
+        <button class="close-install" id="closeInstall">×</button>
+    </div>
+
+    <script>
+        // Game Data
+        const prompts = {
+            friendly: {
+                truths: [
+                    "What's the most embarrassing thing you've ever done?",
+                    "Have you ever pretended to be sick to get out of something?",
+                    "What's the weirdest food combination you enjoy?",
+                    "What's your guilty pleasure TV show?",
+                    "What's the silliest thing you've ever cried about?",
+                    "What's the worst gift you've ever received?",
+                    "What's your most irrational fear?",
+                    "What's the most childish thing you still do?",
+                    "What's the worst lie you've ever told?",
+                    "What's something you're secretly proud of?",
+                     "Have you ever stalked someone on social media?",
+  "What’s a secret talent no one knows you have?",
+  "Have you ever lied about your age?",
+  "What's the weirdest thing you've done when you were alone?",
+  "Have you ever had a crush on a teacher?",
+  "What’s the worst grade you ever got in school?",
+  "Have you ever eavesdropped on someone?",
+  "What's a lie you got caught telling?",
+  "What’s the most money you’ve ever wasted?",
+  "Have you ever copied someone else’s homework?",
+  "What’s something you're ashamed to admit you love?",
+  "What’s the longest you’ve gone without showering?",
+  "Have you ever cried during a movie?",
+  "What’s the weirdest dream you’ve ever had?",
+  "Have you ever tried to impress someone and failed?",
+  "What’s the most embarrassing thing in your search history?",
+  "What's a trend you secretly enjoy?",
+  "What’s the dumbest thing you've ever done out of jealousy?",
+  "Have you ever peeked at someone else’s text messages?",
+  "What’s your biggest insecurity?",
+  "What’s your most dramatic breakup story?",
+  "Have you ever cheated in a game?",
+  "What’s the most awkward date you’ve been on?",
+  "What’s a nickname you’ve been called and hated?",
+  "Have you ever said “I love you” and didn’t mean it?",
+  "What’s something you would never tell your parents?",
+  "Have you ever broken something and blamed someone else?",
+  "What’s a secret you’re keeping from your best friend?",
+  "Have you ever embarrassed yourself in front of a crush?",
+  "What’s your worst fashion decision ever?",
+  "What’s the pettiest thing you’ve done in an argument?",
+  "Have you ever sent a message to the wrong person?",
+  "What’s a rumor you helped spread?",
+  "What’s a fear you’re too embarrassed to admit?",
+  "Have you ever read someone’s diary or messages?",
+  "What’s the worst advice you’ve ever given?",
+  "Have you ever laughed at the wrong moment?",
+  "What’s the most awkward moment you’ve had at work or school?",
+  "Have you ever been caught talking to yourself?"
+                ],
+                dares: [
+                    "Do your best impression of a celebrity.",
+                    "Let the group choose a new hairstyle for you.",
+                    "Sing a song loudly in a public place.",
+                    "Dance with no music for 1 minute.",
+                    "Speak in an accent for the next 10 minutes.",
+                    "Text the 5th person in your contacts 'I think I'm in love with you'.",
+                    "Eat a spoonful of a condiment you dislike.",
+                    "Let someone draw on your face with a marker.",
+                    "Do 20 squats right now.",
+                    "Try to lick your elbow.",
+                    "Act like a chicken for 1 full minute.",
+  "Sing everything you say for the next 5 minutes.",
+  "Put ice cubes down your shirt and wait for them to melt.",
+  "Speak only in rhyme for the next 3 minutes.",
+  "Try to touch your nose with your tongue.",
+  "Do your best animal impression until someone guesses it.",
+  "Say the alphabet backward as fast as you can.",
+  "Let the person to your right redo your hairstyle.",
+  "Talk in a robot voice for 2 minutes.",
+  "Walk across the room like a crab.",
+  "Act like a baby until your next turn.",
+  "Wrap yourself in toilet paper like a mummy.",
+  "Do your best evil laugh and don’t stop until someone joins in.",
+  "Eat a raw onion slice.",
+  "Put a spoonful of salt in your mouth and try to whistle.",
+  "Do 15 jumping jacks right now.",
+  "Speak in a British accent for the next 3 rounds.",
+  "Draw a mustache on your face with a marker.",
+  "Do your best zombie walk across the room.",
+  "Balance a book on your head and walk 10 steps.",
+  "Act like a dog until your next turn.",
+  "Wrap yourself in a blanket and roll across the floor.",
+  "Let the person across from you paint your nails.",
+  "Put on socks on your hands and do a puppet show.",
+  "Pretend you're underwater for the next 2 minutes.",
+  "Do your best opera singing voice.",
+  "Say three nice things about every person in the room.",
+  "Hold a silly face for 30 seconds straight.",
+  "Do your best dance move right now.",
+  "Wear your shirt backward for the next 10 minutes.",
+  "Hold a plank for 30 seconds.",
+  "Talk and act like a cowboy/girl for 3 minutes.",
+  "Make up a song about a random object and sing it.",
+  "Pretend you’re on a cooking show for 2 minutes.",
+  "Say something flirty to the person on your left.",
+  "Speak with your tongue sticking out for 1 minute.",
+  "Act like a cat and try to get someone to pet you.",
+  "Try to do a cartwheel or somersault.",
+  "Spell your name using your body.",
+  "Pretend you’re invisible for 2 minutes.",
+  "Try to juggle 3 random items.",
+  "Act like your favorite movie character for 1 minute.",
+  "Wear socks on your hands until your next turn.",
+  "Say the word 'pickle' after everything you say for 5 minutes.",
+  "Mimic a commercial you’ve recently seen.",
+  "Try to make someone laugh using only sound effects.",
+  "Do a slow-motion run around the room.",
+  "Pretend your shoes are phones and have a conversation.",
+  "Say your biggest fear in a dramatic voice.",
+  "Use your foot to write your name on paper.",
+  "Wrap a towel around your shoulders like a cape and act like a superhero.",
+  "Let someone tickle you for 15 seconds.",
+  "Hold your breath for as long as you can.",
+  "Do your best villain monologue.",
+  "Walk backwards everywhere for the next 3 minutes.",
+  "Put an ice cube in your sock and keep it there for 2 minutes.",
+  "Do 10 sit-ups while singing a song.",
+  "Pretend to be a waiter and take snack orders.",
+  "Whistle your favorite song.",
+  "Talk with your eyes closed until your next turn.",
+  "Make a silly face and keep it for a minute.",
+  "Talk in third person until your next turn.",
+  "Act like you’re surfing for 30 seconds.",
+  "Do a cheerleader routine using random items around you.",
+  "Speak only in movie quotes for 2 minutes.",
+  "Let someone else post something on your story.",
+  "Say the first word that comes to your mind 20 times.",
+  "Let someone blindfold you and feed you something.",
+  "Act like you're a news reporter and report what's happening around.",
+  "Pretend to be someone in the room until someone guesses.",
+  "Gargle a song with water and let others guess it.",
+  "Talk like a pirate for 3 minutes.",
+  "Do your best beatbox for 30 seconds.",
+  "Give your best evil laugh and keep doing it randomly for 5 minutes.",
+  "Put on as many layers of clothing as you can in 1 minute.",
+  "Spell out your favorite word using your nose.",
+  "Speak like a baby until your next turn.",
+  "Try to do a headstand or handstand for 10 seconds.",
+  "Draw a face on your hand and talk to it like it's your friend.",
+  "Let the person to your left redo your eyebrows with makeup.",
+  "Draw a tattoo on your arm using a pen or marker.",
+  "Put your leg behind your head—or at least try.",
+  "Pretend to be a famous chef and teach how to cook a weird food.",
+  "Say the alphabet in a whisper while hopping on one foot.",
+  "Wrap your arms around yourself and give yourself a pep talk.",
+  "Act like you just won a million dollars.",
+  "Let someone style your hair however they want.",
+  "Try to hop like a frog while singing.",
+  "Talk to a pillow like it's your crush.",
+  "Do a mini runway walk and pose at the end.",
+  "Pretend to be on a cooking show using imaginary ingredients.",
+  "Make up a story using the names of everyone in the room.",
+  "Balance something on your head for 1 minute.",
+  "Speak using only song lyrics for the next 3 minutes.",
+  "Put lipstick on without a mirror.",
+  "Pretend you're on a game show and answer silly questions.",
+  "Say 'I'm fabulous!' after everything you say for the next 5 minutes."
+                ]
+            },
+            couple: {
+                truths: [
+                    "What was your first impression of me?",
+                    "What's something you've never told me before?",
+                    "What's your favorite memory of us together?",
+                    "What's one thing you wish I did differently?",
+                    "What's the most attractive thing about me?",
+                    "What's something you're afraid to tell me?",
+                    "What do you think is our biggest strength as a couple?",
+                    "What's your favorite physical feature of mine?",
+                    "What's something you've always wanted to do with me?",
+                     "What was your first impression of me?",
+  "When did you first realize you liked me?",
+  "Have you ever had a dream about me?",
+  "What’s one thing you were nervous to tell me?",
+  "What’s the most romantic thing someone’s ever done for you?",
+  "Have you ever stalked my social media?",
+  "What do you find most attractive about me?",
+  "What’s something silly we’ve done that you’ll never forget?",
+  "When did you first know you were in love?",
+  "Have you ever been jealous in our relationship?",
+  "If you could change one thing about our relationship, what would it be?",
+  "What’s your favorite memory of us together?",
+  "Have you ever lied to me to protect my feelings?",
+  "What’s your biggest fear about our relationship?",
+  "What’s your favorite thing we’ve done as a couple?",
+  "Do you think we spend enough time together?",
+  "What was your first thought the first time we kissed?",
+  "Have you ever doubted our relationship?",
+  "What’s one thing you love that I do without realizing?",
+  "Do you see a future with me?",
+  "What’s something you’ve wanted to ask me but haven’t?",
+  "What’s the biggest lesson you’ve learned from our relationship?",
+  "Have you ever imagined what our wedding would be like?",
+  "Do you remember the moment you realized you were falling for me?",
+  "Have you ever compared our relationship to someone else’s?",
+  "Do you feel loved enough in this relationship?",
+  "What’s something I do that always makes you smile?",
+  "What’s something we should try doing together that we haven’t?",
+  "If we had a couple’s bucket list, what’s the first thing we should add?",
+  "Do you remember our first date? What stood out to you?",
+  "What’s your favorite thing about our relationship?",
+  "What’s a secret you haven’t told me yet?",
+  "Have you ever gone through my phone?",
+  "What’s one thing you think we need to work on as a couple?",
+  "What’s something you’ve always wanted to do with me?",
+  "Do you talk about me with your friends? What do you say?",
+  "Have you ever had a crush on someone else while we were dating?",
+  "Do you like the way I kiss?",
+  "What’s the most romantic thing you think we could do together?",
+  "What do I do that turns you on the most?",
+  "Have you ever told your friends too much about our relationship?",
+  "What’s your favorite compliment I’ve given you?",
+  "What’s your favorite pet name for each other?",
+  "Do you trust me completely?",
+  "What’s something small I do that means a lot to you?",
+  "Would you change anything about our intimacy?",
+  "How do you know when I’m upset even if I don’t say anything?",
+  "Do you think we argue fairly?",
+  "What’s something we should do more often as a couple?",
+  "Do you think we’re soulmates?",
+  "What would you do if we were in a long-distance relationship?",
+  "What’s something you admire about me that I don’t know?",
+  "Would you rather have a romantic date at home or out?",
+  "Have you ever dreamed of having kids with me?",
+  "What’s your favorite thing to do with me on a lazy day?",
+  "What was your biggest relationship mistake before we met?",
+  "Do you feel like I listen to you enough?",
+  "What’s a weird couple tradition you’d want us to start?",
+  "What’s your favorite way to show affection?",
+  "Have you ever thought about proposing or being proposed to?",
+  "Do you think we communicate well?",
+  "What would be your dream vacation with me?",
+  "Do you ever get butterflies when we kiss?",
+  "What’s a moment with me that took your breath away?",
+  "Would you take care of me if I was really sick?",
+  "How has our relationship changed you?",
+  "Have you ever been scared of losing me?",
+  "What’s something about me you’re grateful for?",
+  "Do you have a nickname for me in your head that you don’t say out loud?",
+  "What’s something I do that annoys you but you love anyway?",
+  "Would you ever go on a double date with another couple?",
+  "How do you feel when we’re apart for too long?",
+  "Have you ever thought about moving in together?",
+  "What’s your ideal anniversary celebration?",
+  "Would you rather cuddle all night or have deep conversations?",
+  "Do you ever talk about our relationship with your family?",
+  "What do you think our love story would be titled?",
+  "How do you know when I’m really happy?",
+  "What’s something you’d love to do with me that we haven’t yet?",
+  "Do you believe in fate bringing us together?",
+  "What’s a fantasy you’ve had about us?",
+  "Do you like PDA (public displays of affection)?",
+  "What’s a memory of us that always makes you laugh?",
+  "Do you remember the first thing I ever said to you?",
+  "How do I make you feel safe?",
+  "Do you like it when I compliment you?",
+  "If we were a famous couple, who would we be?",
+  "What’s the best compliment I’ve ever given you?",
+  "How would you describe our chemistry?",
+  "What’s something you wish we did more as a couple?",
+  "What’s something you think we’re really good at together?",
+  "Have you ever thought about what kind of parents we’d be?",
+  "What’s your love language, and do I meet it?",
+  "Have I ever done something unexpected that you loved?",
+  "Do you believe we bring out the best in each other?",
+  "What do you think is the secret to a long-lasting relationship?",
+  "What’s one thing you’ve learned about love from being with me?",
+  "Would you rather have a fancy date night or a cozy one at home?",
+  "What’s something you’re curious about in our future?",
+  "What’s something you want to promise me right now?",
+  "Do you feel emotionally safe with me?",
+  "What’s one of your biggest turn-ons from me?",
+  "If we were to write vows today, what would one line be?",
+                    "What's your favorite thing I do for you?"
+                ],
+                dares: [
+                    "Give me a 1-minute massage.",
+                    "Whisper something romantic in my ear.",
+                    "Recreate our first kiss.",
+                    "Describe what you love about me in 30 seconds.",
+                    "Hold my hand for the next 10 minutes.",
+                    "Feed me something sweet.",
+                    "Write a short love poem about me.",
+                    "Slow dance with me for one song.",
+                    "Give me a compliment for every letter of my name.",
+                     "Give your partner a kiss on the cheek.",
+  "Share your favorite memory together.",
+  "Do a slow dance to a romantic song.",
+  "Whisper something sweet into your partner's ear.",
+  "Let your partner go through your phone for one minute.",
+  "Give your partner a five-minute massage.",
+  "Compliment your partner for one full minute.",
+  "Let your partner post something on your social media.",
+  "Hold hands for the next 10 minutes.",
+  "Do a dramatic reenactment of your first date.",
+  "Sing a love song to your partner.",
+  "Draw a heart on your partner’s hand and kiss it.",
+  "Act like you’re proposing to your partner.",
+  "Feed your partner with your eyes closed.",
+  "Take a selfie kissing your partner’s forehead.",
+  "Let your partner tickle you for 20 seconds.",
+  "Tell your partner what you love most about them.",
+  "Write your partner a short love poem right now.",
+  "Let your partner style your hair.",
+  "Text your partner a romantic message even though they’re right there.",
+  "Stare into your partner’s eyes for 60 seconds without laughing.",
+  "Imitate your partner's laugh.",
+  "Let your partner choose what emoji you must use in every sentence for the next 10 minutes.",
+  "Act out your partner’s morning routine.",
+  "Call your partner by a funny pet name for the next 15 minutes.",
+  "Carry your partner like a prince/princess.",
+  "Let your partner paint one of your nails.",
+  "Tell your partner the cheesiest pickup line you can think of.",
+  "Try to draw your partner blindfolded.",
+  "Let your partner feed you something random from the fridge.",
+  "Say 'I love you' in a different accent.",
+  "Switch an item of clothing with your partner for 5 minutes.",
+  "Take a silly couple selfie and set it as your lock screen for a day.",
+  "Let your partner write something on your hand with a pen.",
+  "Try to do a couple yoga pose.",
+  "Do your best impression of your partner's dance moves.",
+  "Create a couple handshake on the spot.",
+  "Let your partner take a photo of you doing a model pose.",
+  "Try to make your partner laugh using only facial expressions.",
+  "Let your partner design your next social media post caption.",
+  "Let your partner blindfold you and feed you something sweet.",
+  "Take turns saying compliments until one of you runs out.",
+  "Try to guess your partner’s favorite snack while blindfolded.",
+  "Let your partner text a friend from your phone.",
+  "Talk about how you first met for 2 minutes straight.",
+  "Recreate your first kiss as dramatically as possible.",
+  "Do an exaggerated impression of your first date.",
+  "Write your names in the air with your hips.",
+  "Do a slow-motion run toward each other like in a movie.",
+  "Let your partner wear your shoes and walk across the room.",
+  "Take a couple photo doing your best superhero poses.",
+  "Let your partner draw a mustache on your face with eyeliner.",
+  "Try to compliment each other without repeating words.",
+  "Play rock-paper-scissors, loser gives a forehead kiss.",
+  "Take turns saying what you’d do on a dream date.",
+  "Call each other your favorite nickname 5 times in a row.",
+  "Dance together like nobody’s watching for 1 minute.",
+  "Let your partner choose your next Instagram story post.",
+  "Pretend you’re meeting for the first time and flirt.",
+  "Say something romantic in the voice of a cartoon character.",
+  "Do a silly couple walk across the room together.",
+  "Write ‘I ❤️ you’ on your partner’s arm using your finger.",
+  "Do a surprise hug and lift if possible.",
+  "Exchange phones and take 3 funny selfies on each other’s cameras.",
+  "Tell your partner a secret you haven’t told them yet.",
+  "Let your partner try to guess what you're thinking.",
+  "Create a short couple-themed TikTok dance on the spot.",
+  "Act like a clingy couple in a soap opera.",
+  "Say your partner’s name in 5 different accents.",
+  "Describe your relationship using only emojis.",
+  "Pretend to be each other for 2 minutes.",
+  "Plan your dream vacation out loud together.",
+  "Tell the story of how you met using only hand gestures.",
+  "Draw a picture of your future house together.",
+  "Ask your partner a deep question you’ve never asked before.",
+  "Let your partner rest their head on your shoulder silently for 1 minute.",
+  "Make a heart using both your hands.",
+  "Let your partner make a wish and keep it a secret.",
+  "Say 'I love you' in as many languages as you can.",
+  "Take a couple boomerang jumping into each other’s arms.",
+  "Play truth or dare for the next 5 minutes.",
+  "Do a fake proposal and make it dramatic.",
+  "Give your partner 3 spontaneous compliments.",
+  "Pretend you're Romeo and Juliet confessing love.",
+  "Let your partner put on lipstick and kiss your cheek.",
+  "Talk in gibberish and try to say something romantic.",
+  "Pretend you're in a romantic movie scene together.",
+  "Let your partner tickle your feet for 15 seconds.",
+  "Describe your favorite date together using song titles.",
+  "Do an interpretive dance of how your love feels.",
+  "Make a funny face every time your partner speaks for 2 minutes.",
+  "Draw a heart around your partner’s face with your finger.",
+  "Tell your partner what your favorite outfit of theirs is.",
+  "Play a round of ‘Would You Rather’ couple edition.",
+  "Let your partner take a romantic photo of you.",
+  "Hug for a full minute without saying a word.",
+  "Try to guess what your partner ate last meal using only smell.",
+  "Share your most embarrassing couple moment.",
+  "Create a handshake using only pinky fingers.",
+  "Act like love-struck teenagers seeing each other after a week.",
+  "Let your partner feed you something spicy.",
+  "Do a romantic scene from a random movie you both know.",
+  "Write ‘I ❤️ you’ on a piece of paper with your non-dominant hand and gift it.",
+  "Let your partner control your facial expression like a puppet.",
+                    "Plan our dream vacation together in 1 minute."
+                ]
+            },
+            intimate: {
+                truths: [
+                    "What's your wildest fantasy?",
+                    "What's the most adventurous place you've been intimate?",
+                    "What's something you've never done but want to try?",
+                    "What's your favorite part of my body?",
+                    "What's the most romantic thing you've ever done for someone?",
+                    "What's something you find irresistible in a partner?",
+                    "What's your biggest turn-on?",
+                    "What's your most sensitive erogenous zone?",
+                    "What's your favorite memory of us being intimate?",
+                    "What's your biggest turn-on?",
+  "Have you ever had a dream about your partner?",
+  "What's something intimate you've always wanted to try?",
+  "What's your favorite physical feature of your partner?",
+  "Have you ever been jealous in the relationship?",
+  "What's a romantic fantasy you've never told anyone?",
+  "Do you prefer cuddling or kissing more?",
+  "What's your love language?",
+  "What do you find most attractive about your partner emotionally?",
+  "Have you ever lied to make your partner feel better?",
+  "Have you ever thought about our future children?",
+  "What’s the most romantic thing someone’s done for you?",
+  "What do you secretly wish we’d do more of?",
+  "How do you define a perfect date?",
+  "Do you enjoy public displays of affection?",
+  "What’s the most vulnerable moment we’ve shared?",
+  "Have you ever been scared of losing me?",
+  "Do you think we have good physical chemistry?",
+  "What does intimacy mean to you?",
+  "Would you ever want to write a love letter to me?",
+  "Have you ever felt insecure in our relationship?",
+  "When do you feel closest to me?",
+  "What’s something small I do that turns you on?",
+  "If you could relive one moment with me, which would it be?",
+  "Do you like being the big or little spoon?",
+  "What song reminds you of our love?",
+  "What’s something you've wanted to tell me but held back?",
+  "Have you ever cried because of how much you love me?",
+  "What kind of physical touch means the most to you?",
+  "What’s a fantasy you’ve never shared with anyone?",
+  "How do you know when you're in love?",
+  "What’s something I do that drives you wild?",
+  "Do you enjoy romantic surprises?",
+  "What’s your favorite place to be touched?",
+  "Would you rather have a passionate kiss or a deep hug?",
+  "Do you like eye contact during intimate moments?",
+  "Have you ever imagined us getting married?",
+  "What kind of couple activities turn you on?",
+  "Do you prefer making out or subtle touches?",
+  "Would you ever try a couple’s massage class with me?",
+  "What’s something new you'd like to try in the bedroom?",
+  "Have you ever thought about us living together?",
+  "How do you feel about kissing in the rain?",
+  "What’s the most romantic movie moment that reminds you of us?",
+  "What’s your idea of a sexy date night?",
+  "If you could relive our first kiss, would you?",
+  "Do you think you’re more romantic than me?",
+  "What’s one secret desire you have?",
+  "Do you enjoy being teased or doing the teasing?",
+                    "What's something you'd like me to do more often?"
+                ],
+                dares: [
+                    "Give me a passionate kiss for 15 seconds.",
+                    "Remove an article of clothing.",
+                    "Whisper your dirtiest thought about me.",
+                    "Show me your best seductive dance.",
+                    "Let me give you a sensual massage for 2 minutes.",
+                    "Describe your perfect romantic evening.",
+                    "Share a secret fantasy you've never told anyone.",
+                    "Kiss me somewhere unexpected.",
+                    "Undress me with your eyes only - describe what you see.",
+                    "Give your partner a slow, passionate kiss.",
+  "Whisper something naughty in your partner's ear.",
+  "Trace your partner's lips with your finger.",
+  "Give your partner a sensual neck massage for 2 minutes.",
+  "Slow dance with your partner without music.",
+  "Blindfold your partner and feed them a treat.",
+  "Write a sexy message on your partner's body with your finger.",
+  "Let your partner kiss any spot they want for 30 seconds.",
+  "Remove one piece of your partner's clothing slowly.",
+  "Tell your partner your favorite thing about their body.",
+  "Draw a heart on your partner’s chest and kiss it.",
+  "Give your partner a 1-minute foot massage.",
+  "Whisper your favorite memory of the two of you being intimate.",
+  "Trace your partner’s jawline with your lips.",
+  "Play a game of 'guess where I’m going to kiss next.'",
+  "Slowly run your hands through your partner’s hair.",
+  "Let your partner feed you a bite with your eyes closed.",
+  "Kiss your partner’s hand slowly and passionately.",
+  "Share your most secret romantic fantasy.",
+  "Let your partner kiss you anywhere for 30 seconds.",
+  "Give your partner a back rub for 3 minutes.",
+  "Trace your partner's silhouette with your finger.",
+  "Tell your partner a naughty secret you’ve never shared.",
+  "Give your partner a sensual shoulder massage.",
+  "Take turns kissing each other’s earlobes.",
+  "Try to kiss your partner without using your hands.",
+  "Whisper a romantic poem to your partner.",
+  "Write your partner's name on their skin with your lips.",
+  "Caress your partner's face gently for 1 minute.",
+  "Give your partner a slow, deep kiss on the forehead.",
+  "Let your partner choose a spot to kiss that surprises you.",
+  "Gently nibble on your partner’s earlobe.",
+  "Share what you love most about your partner's body.",
+  "Massage your partner's temples softly.",
+  "Take turns tracing each other's lips with your tongue.",
+  "Give your partner a lingering kiss on the collarbone.",
+  "Run your fingers along your partner’s arm slowly.",
+  "Let your partner feed you something sweet while looking into your eyes.",
+  "Kiss your partner’s neck slowly and softly.",
+  "Playfully bite your partner’s finger.",
+  "Tell your partner what you want to do to them later.",
+  "Run your hands over your partner’s back slowly.",
+  "Let your partner write a love note on your skin with lipstick.",
+  "Give your partner a warm embrace for 2 minutes.",
+  "Slowly trace your partner’s lips with your tongue.",
+  "Give your partner a gentle kiss on the hand.",
+  "Lean in and breathe softly on your partner’s neck.",
+  "Take turns giving each other compliments about physical attraction.",
+  "Gently brush your partner’s hair out of their face.",
+  "Whisper what you find most sexy about your partner.",
+  "Place a soft kiss on your partner’s cheek.",
+  "Give your partner a slow, sensual back scratch.",
+  "Hold your partner close and look deeply into their eyes for 1 minute.",
+  "Trace your partner’s fingers with your lips.",
+  "Tell your partner what scent of theirs you love the most.",
+  "Slowly kiss your partner’s wrists.",
+  "Gently run your fingers through your partner’s hair.",
+  "Give your partner a playful kiss on the nose.",
+  "Let your partner kiss you anywhere they want for 1 minute.",
+  "Slowly move your lips along your partner’s jawline.",
+  "Give your partner a gentle scalp massage.",
+  "Whisper a fantasy you want to act out together.",
+  "Give your partner a soft kiss on their temple.",
+  "Slowly trace the curve of your partner’s shoulder with your lips.",
+  "Run your hands softly down your partner’s sides.",
+  "Give your partner a sensual hug from behind.",
+  "Tell your partner what you love about their smile.",
+  "Gently kiss your partner’s fingertips.",
+  "Let your partner blindfold you and kiss you anywhere.",
+  "Slowly kiss your partner’s hand while making eye contact.",
+  "Give your partner a warm, lingering hug.",
+  "Trace your partner’s earlobe with your tongue.",
+  "Tell your partner your favorite intimate memory together.",
+  "Give your partner a gentle kiss on their belly button.",
+  "Play a game of 30-second kisses with your partner.",
+  "Run your fingers down your partner’s spine softly.",
+  "Whisper what you love most about your partner’s personality.",
+  "Give your partner a kiss on their shoulder blade.",
+  "Slowly kiss your partner’s chin.",
+  "Gently stroke your partner’s cheek while looking into their eyes.",
+  "Tell your partner something romantic you want to do soon.",
+  "Give your partner a sensual hand massage.",
+  "Slowly kiss your partner’s lips for 1 minute.",
+  "Play a game where you take turns kissing each other in different spots.",
+  "Trace a love heart on your partner’s back with your finger.",
+  "Give your partner a warm forehead kiss.",
+  "Tell your partner how they make you feel special.",
+  "Slowly kiss your partner’s inner wrist.",
+  "Hold your partner’s face gently and look into their eyes.",
+  "Let your partner trace patterns on your back with their fingertips.",
+  "Give your partner a soft, teasing kiss on the neck.",
+  "Whisper a secret desire to your partner.",
+  "Give your partner a 2-minute hand massage.",
+  "Slowly run your lips along your partner’s arm.",
+  "Tell your partner a romantic fantasy you want to try together.",
+  "Gently hold your partner’s hand and kiss their palm.",
+  "Let your partner kiss your forehead slowly.",
+  "Give your partner a playful nibble on the earlobe.",
+  "Take turns sharing what makes the other irresistible.",
+  "Slowly kiss your partner’s collarbone.",
+  "Run your fingers through your partner’s hair softly.",
+  "Give your partner a warm hug while whispering something sweet.",
+  "Tell your partner what physical feature you adore most.",
+  "Slowly kiss your partner’s cheek and smile.",
+                    "Let me blindfold you for 1 minute."
+                ]
+            }
+        };
+
+        // Game State
+        let currentLevel = '';
+        let gameStarted = false;
+        let deferredPrompt;
+        
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const inputArea = document.getElementById('inputArea');
+        const installPrompt = document.getElementById('installPrompt');
+        const installButton = document.getElementById('installButton');
+        const closeInstall = document.getElementById('closeInstall');
+        const backButton = document.getElementById('backButton');
+        
+        // Initialize the game
+        function initGame() {
+            // Add initial bot messages
+            addBotMessage("Hi there! 👋 Welcome to Truth or Dare Game!");
+            setTimeout(() => {
+                addBotMessage("I'm here to make your gatherings more fun! Let's get started...");
+            }, 800);
+            
+            setTimeout(() => {
+                addBotMessage("Choose a game level:");
+                showLevelSelection();
+            }, 1600);
+        }
+        
+        // Add a bot message to the chat
+        function addBotMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            // Add timestamp
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = formatTime();
+            messageDiv.appendChild(timestamp);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Add a user message to the chat
+        function addUserMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            // Add timestamp
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = formatTime();
+            messageDiv.appendChild(timestamp);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Show level selection buttons
+        function showLevelSelection() {
+            inputArea.innerHTML = '';
+            
+            const friendlyBtn = document.createElement('button');
+            friendlyBtn.className = 'level-btn friendly';
+            friendlyBtn.innerHTML = '<i class="fas fa-users"></i> Friendly';
+            friendlyBtn.onclick = () => selectLevel('friendly');
+            
+            const coupleBtn = document.createElement('button');
+            coupleBtn.className = 'level-btn couple';
+            coupleBtn.innerHTML = '<i class="fas fa-heart"></i> Couple';
+            coupleBtn.onclick = () => selectLevel('couple');
+            
+            const intimateBtn = document.createElement('button');
+            intimateBtn.className = 'level-btn intimate';
+            intimateBtn.innerHTML = '<i class="fas fa-fire"></i> Intimate';
+            intimateBtn.onclick = () => selectLevel('intimate');
+            
+            inputArea.appendChild(friendlyBtn);
+            inputArea.appendChild(coupleBtn);
+            inputArea.appendChild(intimateBtn);
+        }
+        
+        // Show game action buttons
+        function showActionButtons() {
+            inputArea.innerHTML = '';
+            
+            const truthBtn = document.createElement('button');
+            truthBtn.className = 'action-btn truth';
+            truthBtn.textContent = 'Truth';
+            truthBtn.onclick = () => getPrompt('truth');
+            
+            const dareBtn = document.createElement('button');
+            dareBtn.className = 'action-btn dare';
+            dareBtn.textContent = 'Dare';
+            dareBtn.onclick = () => getPrompt('dare');
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'action-btn next';
+            nextBtn.textContent = 'Next';
+            nextBtn.onclick = () => getRandomPrompt();
+            
+            const restartBtn = document.createElement('button');
+            restartBtn.className = 'action-btn restart';
+            restartBtn.textContent = 'Restart';
+            restartBtn.onclick = restartGame;
+            
+            inputArea.appendChild(truthBtn);
+            inputArea.appendChild(dareBtn);
+            inputArea.appendChild(nextBtn);
+            inputArea.appendChild(restartBtn);
+        }
+        
+        // Select a game level
+        function selectLevel(level) {
+            currentLevel = level;
+            gameStarted = true;
+            
+            // Add user message
+            addUserMessage(level.charAt(0).toUpperCase() + level.slice(1) + " Level");
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                // Remove typing indicator
+                document.querySelector('.typing-indicator')?.remove();
+                
+                // Add bot response
+                let response;
+                switch(level) {
+                    case 'friendly':
+                        response = "Great choice! Friendly level is perfect for groups and casual fun. Ready for your first challenge?";
+                        break;
+                    case 'couple':
+                        response = "Romantic choice! Couple level will bring you closer together. Ready for your first challenge?";
+                        break;
+                    case 'intimate':
+                        response = "Ooh, getting spicy! Intimate level for those special moments. Ready for your first challenge?";
+                        break;
+                }
+                
+                addBotMessage(response);
+                
+                // Show action buttons
+                showActionButtons();
+                
+                // Get first prompt
+                getRandomPrompt();
+            }, 1500);
+        }
+        
+        // Get a random prompt
+        function getRandomPrompt() {
+            const types = ['truth', 'dare'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            getPrompt(randomType);
+        }
+        
+        // Get a prompt
+        function getPrompt(type) {
+            // Show typing indicator
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                // Remove typing indicator
+                document.querySelector('.typing-indicator')?.remove();
+                
+                // Get random prompt
+                const promptsArray = prompts[currentLevel][`${type}s`];
+                const randomIndex = Math.floor(Math.random() * promptsArray.length);
+                const prompt = promptsArray[randomIndex];
+                
+                // Create prompt card
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'prompt-card';
+                
+                const typeDiv = document.createElement('div');
+                typeDiv.className = 'prompt-type';
+                typeDiv.textContent = type.toUpperCase();
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'prompt-text';
+                textDiv.textContent = prompt;
+                
+                cardDiv.appendChild(typeDiv);
+                cardDiv.appendChild(textDiv);
+                
+                // Add to chat as bot message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message bot-message';
+                messageDiv.appendChild(cardDiv);
+                
+                // Add timestamp
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = formatTime();
+                messageDiv.appendChild(timestamp);
+                
+                chatContainer.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 1000);
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'typing-dot';
+                typingDiv.appendChild(dot);
+            }
+            
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Format current time
+        function formatTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + 
+                   now.getMinutes().toString().padStart(2, '0');
+        }
+        
+        // Restart the game
+        function restartGame() {
+            // Clear chat container except first messages
+            while (chatContainer.children.length > 3) {
+                chatContainer.removeChild(chatContainer.lastChild);
+            }
+            
+            gameStarted = false;
+            currentLevel = '';
+            initGame();
+        }
+        
+        // Back button functionality
+        backButton.addEventListener('click', () => {
+            if (gameStarted) {
+                restartGame();
+            }
+        });
+        
+        // PWA Installation Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.style.display = 'flex';
+        });
+        
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installPrompt.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+        
+        closeInstall.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+        });
+        
+        // Initialize the game when page loads
+        window.onload = function() {
+            initGame();
+            
+            // Hide install prompt if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                installPrompt.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
